@@ -1,0 +1,50 @@
+[
+    {
+        "type":"slef",
+        "version":1
+    },
+    {
+        "type":"product",
+        "company":"MiDi",
+        "device":"R1",
+        "version":"1.1",
+        "ota_name":"MiDi R1",
+        "firmware_name":"midi_r1",
+        "usb_pid":"0x0101",
+        "dac_pid":"0x0004",
+        "vid":"0x32BB"
+    },
+    {
+        "type":"screen",
+        "hor":480,
+        "ver":800
+    },
+    {
+        "type":"volume",
+        "vol_warn_enable":1,
+        "lock_vol":[
+            {"headset":50}
+        ],
+        "default_vol":[
+            {"headset":20}
+        ],
+        "warn_vol":[
+            {"headset":34}
+        ]
+    },
+    {
+        "type":"function",
+        "fcn0":[
+            {"dac_to_store":0},
+            {"book_set_percent":1},
+            {"most_played":1},
+            {"playmenu_eq_disable":0},
+            {"dark_theme_enable":0},
+            {"screen_short_enable":1},
+            {"lyric_color_enable":1},
+            {"tf_image_cache_enable":0},
+            {"tf_music_db_enable":0}
+        ]
+    }
+]
+    

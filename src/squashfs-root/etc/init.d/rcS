@@ -5,10 +5,21 @@
 # executing them in numerical order.
 #
 source /etc/profile
+
+# plan B5: kernel printk flood (adc/i2c poll retries, hrtimer warnings)
+# off the console; errors and oopses still print.
+dmesg -n 3 2>/dev/null
+
+# Boot timeline (plan A1): one guest-uptime stamp per S?? script on the
+# console. read is a shell builtin, so stamping adds no forks; boot-time
+# A/B deltas compare runs that carry the same stamping overhead.
+read UP _ < /proc/uptime && echo "[rcS] $UP boot start"
 for i in /etc/init.d/S??* ;do
 
      # Ignore dangling symlinks (if any).
      [ ! -f "$i" ] && continue
+
+     read UP _ < /proc/uptime && echo "[rcS] $UP begin $i"
 
      case "$i" in
 	*.sh)
@@ -25,4 +36,5 @@ for i in /etc/init.d/S??* ;do
 	    ;;
     esac
 done
+read UP _ < /proc/uptime && echo "[rcS] $UP rcS done"
 

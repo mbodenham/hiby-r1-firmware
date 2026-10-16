@@ -8,7 +8,9 @@ case "$1" in
 	echo "Starting sys_server..."
 	# make sure the /mnt dir is empty
 	rm -rf /mnt/*
-	/usr/bin/sys_server &
+	# plan B5: sys_server threads write a continuous debug stream to the
+	# inherited /dev/console fds — disconnect them from the serial console.
+	/usr/bin/sys_server >/dev/null 2>&1 &
 	;;
   stop)
 	echo "Stopping sys_server..."

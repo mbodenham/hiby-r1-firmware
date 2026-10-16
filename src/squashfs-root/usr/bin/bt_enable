@@ -1,4 +1,56 @@
 #!/bin/sh
 
-bt-adapter --set "Powered" "On"
-bt-adapter --set "Discoverable" "On"
+# plan B3: on-demand Bluetooth bring-up. The boot-time bt_init (S95) only
+# prepares the radio (rfkill, patchram, hci0) and /tmp/bt_init_ok; the
+# daemons and the adapter start here, when the user powers BT on.
+# Idempotent: after bt_disable / bt_suspend deep-off (rfkill 0, patchram
+# killed) it re-runs bt_init, which also restarts the system bus those
+# scripts killed.
+
+# 1. radio side up (bt_init is idempotent for this)
+rf_state=$(cat /sys/class/rfkill/rfkill0/state 2>/dev/null)
+hci_up=$(hciconfig hci0 2>/dev/null | grep -c "UP")
+if [ "$rf_state" != "1" ] || [ "$hci_up" = "0" ]; then
+	/usr/bin/bt_init
+fi
+
+# 2. daemons, only when absent
+if ! pidof bluetoothd >/dev/null 2>&1; then
+	# -E is enable experimental interface
+	# -C is enable sdp service
+	/usr/libexec/bluetooth/bluetoothd -E -C &
+
+	# reponse connection request automatic
+	bt-agent -c NoInputNoOutput &
+
+	# launch bluealsa server
+	/usr/bin/bluealsa -p a2dp-source --a2dp-volume &
+fi
+
+# 3. power the adapter on; the first calls race bluez owning the bus, so
+# retry until it takes
+ok=0
+n=0
+while [ "$n" -lt 20 ]; do
+	if bt-adapter --set "Powered" "On" 2>/dev/null; then
+		ok=1
+		break
+	fi
+	n=$((n+1))
+	usleep 300000
+done
+
+# 4. name + HiByLink serial port, once per bluetoothd session (bluez
+# adapter storage lives on the read-only rootfs, nothing persists)
+if [ "$ok" = "1" ] && [ -f /usr/resource/bt_name ]; then
+	bt_name=`cat /usr/resource/bt_name`
+	bt-adapter --set "Alias" "$bt_name"
+	sdptool add HIBYLINK_SP
+fi
+
+if [ "$ok" = "1" ]; then
+	bt-adapter --set "Discoverable" "On"
+else
+	echo "bluetooth stack did not come up"
+	exit 1
+fi

@@ -69,24 +69,13 @@ sleep 5
 hciconfig hci0 up
 sleep 1
 
-# turn on bluetooth service
-# - E is enable experimental interface
-# - C is enable sdp service
-/usr/libexec/bluetooth/bluetoothd -E -C &
-
 hciconfig hci0 reset
 sleep 1
 
-# reponse connection request automatic
-bt-agent -c NoInputNoOutput &
-sleep 2
-
-#monitor listening the device status
-# bt-monitor &
-
-# launch bluealas server
-
-/usr/bin/bluealsa -p a2dp-source --a2dp-volume &
+# plan B3: bluetoothd / bt-agent / bluealsa and the adapter setup start
+# on demand from bt_enable when the user powers BT on, instead of at
+# every boot (RAM + boot-time CPU wakeups saved; /tmp/bt_init_ok only
+# means the radio side is up).
 
 ALSA_CONF_FILE="/usr/data/alsa.conf"
 # 创建默认alsa配置文件
@@ -112,20 +101,6 @@ else
 fi
 
 sleep 1
-
-if [ -f /usr/resource/bt_name ]
-then
-bt-adapter --set "Powered" "On"
-bt_name=`cat /usr/resource/bt_name`
-bt-adapter --set "Alias" "$bt_name"
-
-# add hibylink serial port
-sleep 1
-sdptool add HIBYLINK_SP
-
-fi
-bt-adapter --set "Powered" "Off"
-# bt-media &
 
 #set the bluetooth init ok flag
 mkdir -p /tmp

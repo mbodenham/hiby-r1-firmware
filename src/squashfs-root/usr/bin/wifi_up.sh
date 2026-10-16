@@ -13,6 +13,10 @@ elif [ -f /usr/data/wpa_supplicant.conf ]; then
     wpa_conf=/usr/data/wpa_supplicant.conf
 fi
 
+# plan B2: the boot-time MAC setup is backgrounded; make sure the MAC is
+# set now, while the interface is still down.
+wifi_set_mac.sh start >/dev/null 2>&1
+
 rfkill unblock wifi
 ifconfig wlan0 up
 

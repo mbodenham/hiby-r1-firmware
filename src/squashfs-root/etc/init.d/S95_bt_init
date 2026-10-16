@@ -10,7 +10,7 @@ case "$1" in
   start)
 	echo -n "Starting $0 : begin "
 
-    [ -f $PL01 ] && ( $PL01 & ) || echo " file <$PL01> don't exist."
+    [ -f $PL01 ] && ( $PL01 >/dev/null 2>&1 & ) || echo " file <$PL01> don't exist."
 
 	echo -n "Starting $0 : end "
 	;;

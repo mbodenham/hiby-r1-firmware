@@ -43,7 +43,7 @@
             {"screen_short_enable":1},
             {"lyric_color_enable":1},
             {"tf_image_cache_enable":1},
-            {"tf_music_db_enable":0}
+            {"tf_music_db_enable":1}
         ]
     }
 ]

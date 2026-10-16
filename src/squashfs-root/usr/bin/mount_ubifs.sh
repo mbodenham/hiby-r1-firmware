@@ -178,7 +178,11 @@ if [ ! -e $mount_path ]; then
 	error_exit "can't create mount path: $mount_path"
 fi
 
-mount -o sync -t ubifs /dev/${ubi_name}_0 $mount_path
+# plan C1: -o sync made every settings/DB write synchronous to NAND and
+# full-atime made reads dirty pages too; noatime keeps reads clean and
+# UBIFS journal + the apps' own fsync()s keep the power-loss story. The
+# erase-and-retry recovery path below is kept unchanged.
+mount -o noatime -t ubifs /dev/${ubi_name}_0 $mount_path
 if [ $? != 0 ]; then
 	if [ "$try_count" != "" ]; then
 		error_exit "mount ubi error again"
